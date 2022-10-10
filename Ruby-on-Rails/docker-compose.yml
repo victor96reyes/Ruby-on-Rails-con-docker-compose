@@ -1,0 +1,45 @@
+version: '3.7'
+
+services:
+
+    db:    
+        image: mysql:5.7
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: ruby
+            MYSQL_USER: user1
+            MYSQL_PASSWORD: user123
+        ports:
+            - "3306:3306"
+        volumes:
+            - ./sql-data:/var/lib/mysql
+
+    app: 
+        build: .
+        command: bundle exec rails s -p 8000 -b '0.0.0.0'
+        volumes: 
+            - ".:/app"
+        ports: 
+            - "8000:8000"
+        depends_on:
+            - db
+        links:
+            - db
+        environment:
+            DB_USER: root
+            DB_NAME: ruby
+            DB_PASSWORD: root
+            DB_HOST: db
+    
+    phpmyadmin:
+        image: phpmyadmin
+        depends_on:
+            - db
+        links:
+            - db
+        ports:
+         - 8080:80
+        environment:
+            PMA_ARBITRARY: 1
+            PMA_HOST: db
+            MYSQL_ROOT_PASSWORD: root
